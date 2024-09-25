@@ -23,6 +23,15 @@ public:
     I2CDevice amp = I2CDevice(master, slave_address, _BIG_ENDIAN);
 
     void begin(uint32_t frequency);
+
+
     bool configure();
+
+    /*
+     * Check i2c bus to see if amp exists on expected address and revision number is correct, return false if not
+     */
+    bool isAvailable();
+
+
     void report_error(const char* message);
 };

@@ -6,16 +6,9 @@ void max98389::begin(uint32_t frequency){
 }
 
 bool max98389::configure(){
-    uint8_t revisionId;
-    // Check the revision ID and check for I2C errors
-    if (amp.read(revision_id_register, &revisionId, false)) {
-        if ( revisionId != expected_revision_id) {
-            Serial.printf("ERROR: Manufacturer ID is 0x%X. Expected 0x%X.\n", revisionId, expected_revision_id);
-            return false;
-        }
-    } else {
-        report_error("ERROR: Failed to send manufacturer id register value");
-        return false;
+
+    if (!isAvailable()){
+        return false; //Either amp IC not found or revision number is wrong!
     }
 
     if(!amp.write(pcm_mode_register, (uint8_t) 0b11000000, false)){
@@ -70,6 +63,20 @@ bool max98389::configure(){
 
     Serial.println("Configured sensor successfully.");
     return true;
+}
+
+bool max98389::isAvailable(){
+    uint8_t revisionId;
+    // Check the revision ID and check for I2C errors
+    if (amp.read(revision_id_register, &revisionId, false)) {
+        if ( revisionId != expected_revision_id) {
+            Serial.printf("ERROR: Manufacturer ID is 0x%X. Expected 0x%X.\n", revisionId, expected_revision_id);
+            return false;
+        }
+    } else {
+        report_error("ERROR: Failed to send manufacturer id register value");
+        return false;
+    }
 }
 
 void max98389::report_error(const char* message) {

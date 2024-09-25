@@ -3,6 +3,7 @@
 #include "max98389.h"
 #include <Audio.h>
 
+const unsigned long amp_config_poll_time_ms = 500;
 
 // GUItool: begin automatically generated code
 AudioSynthWaveform       waveform1;      //xy=188,240
@@ -18,7 +19,10 @@ AudioConnection          patchCord2(usb1, 0, i2s2, 0);
 AudioConnection          patchCord3(usb1, 1, i2s2, 1);
 AudioConnection          patchCord4(i2s_quad1, 2, usb2, 0);
 AudioConnection          patchCord5(i2s_quad1, 3, usb2, 1);
+
 bool configured = false;
+unsigned long configuration_time_counter = 0;
+max98389 max;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -26,7 +30,7 @@ void setup() {
     // Enable the serial port for debugging
     Serial.begin(9600);
     Serial.println("Started");
-    max98389 max;
+    
     max.master.set_internal_pullups(InternalPullup::disabled);
     max.begin(400 * 1000U);
     // Check that we can see the sensor and configure it.
@@ -49,18 +53,21 @@ void setup() {
     envelope1.noteOn();
 }
 
+
+
 void loop() {
 
-    float w;
-    for (uint32_t i =1; i<20; i++) {
-        w = i / 20.0;
-        //waveform1.pulseWidth(w);
-        
-        /*digitalWrite(LED_BUILTIN, HIGH);
-        delay(800);
-        envelope1.noteOff();
-        digitalWrite(LED_BUILTIN, LOW);
-        delay(600);
-        */
+    unsigned long current_millis = millis();
+    if (current_millis > (configuration_time_counter + amp_config_poll_time_ms)){
+        configuration_time_counter = current_millis;
+        bool amp_present_and_correct_revision = max.isAvailable();
+        if (amp_present_and_correct_revision && !configured){ //If amp found and currently not configured
+            configured = max.configure();
+        }
+        else if ((!amp_present_and_correct_revision) && configured){ //If amp lost and currently configured
+            configured = false; //Assume amp has lost power and is no longer configured
+        }
     }
+
+
 }
