@@ -22,7 +22,8 @@ AudioConnection          patchCord5(i2s_quad1, 3, usb2, 1);
 
 bool configured = false;
 unsigned long configuration_time_counter = 0;
-max98389 max;
+
+max98389* p_max;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -31,6 +32,8 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Started");
     
+    static max98389 max;
+    p_max = &max;
     max.master.set_internal_pullups(InternalPullup::disabled);
     max.begin(400 * 1000U);
     // Check that we can see the sensor and configure it.
@@ -60,12 +63,14 @@ void loop() {
     unsigned long current_millis = millis();
     if (current_millis > (configuration_time_counter + amp_config_poll_time_ms)){
         configuration_time_counter = current_millis;
-        bool amp_present_and_correct_revision = max.isAvailable();
+        bool amp_present_and_correct_revision = p_max->isAvailable();
         if (amp_present_and_correct_revision && !configured){ //If amp found and currently not configured
-            configured = max.configure();
+            Serial.println("Amp found on i2c bus. Configuring...");
+            configured = p_max->configure();
         }
         else if ((!amp_present_and_correct_revision) && configured){ //If amp lost and currently configured
             configured = false; //Assume amp has lost power and is no longer configured
+            Serial.println("Amp has been lost on the i2c bus");
         }
     }
 

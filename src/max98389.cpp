@@ -52,6 +52,12 @@ bool max98389::configure(){
         return false;
     }
 
+    if(!amp.write(auto_mute_brownout_en_register, (uint8_t) 0x01, false)){
+        report_error("ERROR: Failed to write auto mute brownout enable.");
+        return false;
+    }
+    
+
     for(uint16_t i = 0; i < 7; i++){
         amp.write((uint16_t)(tx_hi_z_control1+i), (uint8_t) 0x00, false);
     }
@@ -69,14 +75,18 @@ bool max98389::isAvailable(){
     uint8_t revisionId;
     // Check the revision ID and check for I2C errors
     if (amp.read(revision_id_register, &revisionId, false)) {
-        if ( revisionId != expected_revision_id) {
-            Serial.printf("ERROR: Manufacturer ID is 0x%X. Expected 0x%X.\n", revisionId, expected_revision_id);
+        if ( revisionId != 65) 
+        {
+            Serial.println("ERROR: Manufacturer ID not 0x41");
+            Serial.println(revisionId);
+            Serial.println(expected_revision_id);
             return false;
         }
     } else {
         report_error("ERROR: Failed to send manufacturer id register value");
         return false;
     }
+    return true;
 }
 
 void max98389::report_error(const char* message) {
