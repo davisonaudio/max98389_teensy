@@ -17,7 +17,9 @@ public:
     const uint16_t pcm_tx_en_register =         0x205F;
     const uint16_t amp_en_register =            0x209F;
     const uint16_t iv_data_en_register =        0x20A7;
-    const uint16_t auto_mute_brownout_en_register =      0x20EE;
+    const uint16_t brownout_threshold_register = 0x20E0;
+    const uint16_t auto_mute_brownout_en_register =      0x20EF;
+    const uint16_t auto_recovery_register =     0x210E;
     const uint16_t global_en_register =         0x210F;
 
     I2CMaster& master = Master;
@@ -32,7 +34,6 @@ public:
      * Check i2c bus to see if amp exists on expected address and revision number is correct, return false if not
      */
     bool isAvailable();
-
 
     void report_error(const char* message);
 };

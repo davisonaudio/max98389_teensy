@@ -72,7 +72,7 @@ void loop() {
             configured = false; //Assume amp has lost power and is no longer configured
             Serial.println("Amp has been lost on the i2c bus");
         }
+
+        p_max->globalEnableStatus();
     }
-
-
 }

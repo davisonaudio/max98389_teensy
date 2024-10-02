@@ -52,7 +52,13 @@ bool max98389::configure(){
         return false;
     }
 
-    if(!amp.write(auto_mute_brownout_en_register, (uint8_t) 0x01, false)){
+    if(!amp.write(auto_recovery_register, (uint8_t) 0x01, false)){
+        report_error("ERROR: Failed to write to auto recovery.");
+        return false;
+    }
+    
+
+    if(!amp.write(auto_mute_brownout_en_register, (uint8_t) 0x0, false)){
         report_error("ERROR: Failed to write auto mute brownout enable.");
         return false;
     }
@@ -88,6 +94,7 @@ bool max98389::isAvailable(){
     }
     return true;
 }
+
 
 void max98389::report_error(const char* message) {
     Serial.print(message);
